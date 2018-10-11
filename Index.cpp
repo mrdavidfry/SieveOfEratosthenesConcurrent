@@ -11,6 +11,14 @@ Node::Node(int i){
   next = NULL;
 }
 
+void Node::lock(){
+  mutex.lock();
+}
+
+void Node::unlock(){
+  mutex.unlock();
+}
+
 Node* Node::getPrev(){
   return prev;
 }
@@ -44,9 +52,8 @@ Index::Index(int seeds[], int length){
 }
 
 bool Index::search(int key){
-  cout << "search called";
-  Node *curNode = head;
   int curKey;
+  Node *curNode = head;
   while (curNode != NULL){
     curKey = curNode->getItem();
     if(key == curKey){
@@ -98,7 +105,6 @@ bool Index::insert(int key){
 
 
 bool Index::remove(int key){
-  cout << "remove called";
   Node *curNode = head;
   int curKey;
   while (curNode != NULL){

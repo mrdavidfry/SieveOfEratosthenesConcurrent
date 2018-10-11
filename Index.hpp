@@ -5,7 +5,7 @@
 #include <thread>
 #include <mutex>
 
-// The Index class provides a wrapper for a Concurrent Doubely-Linked-List 
+// The Index class provides a wrapper for a Concurrent Doubely-Linked-List
 // implementation
 
 using namespace std;
@@ -14,7 +14,9 @@ class Node {
 
   private:
 
-    // index key of the node  
+    // Mutex of the node
+    std::mutex mutex;
+    // index key of the node
     int item;
 
     // pointers to next/previous nodes in the list
@@ -26,15 +28,19 @@ class Node {
     // class constructor, takes key value and prev/next list elements
     Node(int item);
 
+    // Mutex methods:
+    void lock();
+    void unlock();
+
     // node query methods
     Node* getPrev();
     Node* getNext();
     int getItem();
-    
+
     // node update methods
     void setPrev(Node* prev);
     void setNext(Node* next);
-  
+
 };
 
 class Index {
@@ -44,7 +50,7 @@ class Index {
     // pointers to the head and tail of the doubly linked list
     Node* head;
     Node* tail;
-    
+
   public:
 
     // class constructor, loads an image from a provided file (or URL?)
