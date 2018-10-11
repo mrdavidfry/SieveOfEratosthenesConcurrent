@@ -44,7 +44,8 @@ Index::Index(int seeds[], int length){
 }
 
 bool Index::search(int key){
-  Node *curNode = this->head;
+  cout << "search called";
+  Node *curNode = head;
   int curKey;
   while (curNode != NULL){
     curKey = curNode->getItem();
@@ -55,39 +56,70 @@ bool Index::search(int key){
     }
     curNode = curNode->getNext();
   }
+  return false; // key not found
+}
+
+void insertNode(int key, Node *prevNode, Node *nextNode) {
+  Node *newNode = new Node(key);
+  newNode->setPrev(prevNode);
+  newNode->setNext(nextNode);
+  if (prevNode != NULL){
+    prevNode->setNext(newNode);
+  }
+  if (nextNode != NULL){
+    nextNode->setPrev(newNode);
+  }
 }
 
 bool Index::insert(int key){
   Node *prevNode = NULL;
-  Node *curNode = this->head;
+  Node *curNode = head;
+  if (curNode == NULL) {
+    insertNode(key, prevNode, NULL);
+    return true;
+  }
   Node *nextNode = curNode->getNext();
   int curKey;
   while (curNode != NULL){
     curKey = curNode->getItem();
     if (key == curKey){
-      return false;
-    } else if(key > curKey) {
-      Node *newNode = new Node(key);
-      newNode->setPrev(prevNode);
-      newNode->setNext(nextNode);
-      if (prevNode != NULL){
-        prevNode->setNext(newNode);
-      }
-      if (nextNode != NULL){
-        nextNode->setPrev(newNode);
-      }
-      return true;
+      return false; // key already in index
+    } else if(key > curKey || nextNode == NULL) {
+      insertNode(key, prevNode, nextNode);
+      return true; // inserted key
     }
     prevNode = curNode;
     curNode = nextNode;
     nextNode = nextNode->getNext();
   }
+  insertNode(key, prevNode, nextNode);
+  return true;
 }
 
 
 bool Index::remove(int key){
-  cerr << "TODO: implement the index remove function" << endl;
-  exit(-1);
+  cout << "remove called";
+  Node *curNode = head;
+  int curKey;
+  while (curNode != NULL){
+    curKey = curNode->getItem();
+    if (key == curKey){
+      Node *prevNode = curNode->getPrev();
+      Node * nextNode = curNode->getNext();
+      if (prevNode != NULL){
+        prevNode->setNext(nextNode);
+      }
+      if (nextNode != NULL){
+        nextNode->setPrev(prevNode);
+      }
+      delete curNode;
+      return true;
+    } else if (key > curKey) {
+      return false; // could not find key
+    }
+    curNode =curNode->getNext();
+  }
+  return false;
 }
 
 void Index::printIndex(char order){

@@ -82,7 +82,7 @@ int main(int argc, char ** argv)
   }
   int avg = sum/10;
   cout << "average execution time = " << avg << " microseconds" << endl;
-  
+
   // check the final state of the index at the end of all 10 runs
   cout << "print index forwards:" << endl;
   index->printIndex('<');
