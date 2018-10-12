@@ -50,19 +50,26 @@ Index::Index(int seeds[], int length){
     bool ret = insert(seeds[i]);
   }
 }
-
+std::mutex mtx;
 bool Index::search(int key){
+  mtx.lock();
   int curKey;
   Node *curNode = head;
+  Node *prevNode = NULL;
   while (curNode != NULL){
     curKey = curNode->getItem();
     if(key == curKey){
+      mtx.unlock();
       return true; // key found!
     } else if(key > curKey){
+      mtx.unlock();
       return false; // key not found
     }
+    prevNode = curNode;
     curNode = curNode->getNext();
+    prevNode->unlock();
   }
+  mtx.unlock();
   return false; // key not found
 }
 
@@ -86,13 +93,16 @@ bool Index::insert(int key){
     return true;
   }
   Node *nextNode = curNode->getNext();
+  mtx.lock();
   int curKey;
   while (curNode != NULL){
     curKey = curNode->getItem();
     if (key == curKey){
+      mtx.unlock();
       return false; // key already in index
     } else if(key > curKey || nextNode == NULL) {
       insertNode(key, prevNode, nextNode);
+      mtx.unlock();
       return true; // inserted key
     }
     prevNode = curNode;
@@ -100,11 +110,13 @@ bool Index::insert(int key){
     nextNode = nextNode->getNext();
   }
   insertNode(key, prevNode, nextNode);
+  mtx.unlock();
   return true;
 }
 
 
 bool Index::remove(int key){
+  mtx.lock();
   Node *curNode = head;
   int curKey;
   while (curNode != NULL){
@@ -119,12 +131,15 @@ bool Index::remove(int key){
         nextNode->setPrev(prevNode);
       }
       delete curNode;
+      mtx.unlock();
       return true;
     } else if (key > curKey) {
+      mtx.unlock();
       return false; // could not find key
     }
     curNode =curNode->getNext();
   }
+  mtx.unlock();
   return false;
 }
 
