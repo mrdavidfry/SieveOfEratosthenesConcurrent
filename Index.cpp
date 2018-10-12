@@ -91,6 +91,7 @@ bool Index::insert(int key){
   Node *curNode = head;
   if (curNode == NULL) {
     insertNode(key, prevNode, NULL);
+    mtx.unlock();
     return true;
   }
   Node *nextNode = curNode->getNext();
