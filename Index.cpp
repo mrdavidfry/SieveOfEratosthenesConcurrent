@@ -65,14 +65,14 @@ bool Index::search(int key){
   this->lock();
   Node *curNode = head;
   Node *prevNode;
-  if (curNode == NULL) {
+  if(curNode == NULL){
     this->unlock();
     return false;
   } else {
     curNode->lock();
     this->unlock();
   }
-  while (curNode != NULL){
+  while(curNode != NULL){
     curKey = curNode->getItem();
     if(key == curKey){
       curNode->unlock();
@@ -83,7 +83,7 @@ bool Index::search(int key){
     }
     prevNode = curNode; // make prevNode point to the same object as curNode
     curNode = curNode->getNext(); // change curNode's pointer to point to the next object. Does not change prevNode's pointer
-    if (curNode != NULL) { // curNode is a local variable, so will not change locally
+    if(curNode != NULL){ // curNode is a local variable, so will not change locally
       curNode->lock(); // thus, when lock() is called, curNode will not be NULL locally!
     }
     prevNode->unlock();
@@ -95,10 +95,10 @@ void insertNode(int key, Node *curNode, Node *nextNode) {
   Node *newNode = new Node(key);
   newNode->setPrev(curNode);
   newNode->setNext(nextNode);
-  if (curNode != NULL){
+  if(curNode != NULL){
     curNode->setNext(newNode);
   }
-  if (nextNode != NULL){
+  if(nextNode != NULL){
     nextNode->setPrev(newNode);
   }
 }
@@ -108,7 +108,7 @@ bool Index::insert(int key){
   this->lock();
   Node *curNode = head;
   Node *nextNode;
-  if (curNode == NULL) {
+  if(curNode == NULL){
     insertNode(key, head, tail);
     this->unlock();
     return true;
@@ -117,33 +117,33 @@ bool Index::insert(int key){
     nextNode = curNode->getNext();
   }
 
-  if (nextNode != NULL) {
+  if(nextNode != NULL){
     nextNode->lock();
   }
   this->unlock();
   int curKey;
-  while (curNode != NULL){
+  while(curNode != NULL){
     curKey = curNode->getItem();
-    if (key == curKey){
+    if(key == curKey){
       curNode->unlock();
-      if (nextNode != NULL) {
+      if(nextNode != NULL){
         nextNode->unlock();
       }
       return false; // key already in index
-    } else if(key > curKey || nextNode == NULL) {
+    } else if(key > curKey || nextNode == NULL){
       insertNode(key, curNode, nextNode);
       curNode->unlock();
-      if (nextNode != NULL) {
+      if(nextNode != NULL){
         nextNode->unlock();
       }
       return true; // inserted key
     }
     prevNode = curNode;
     curNode = nextNode;
-    if (nextNode != NULL) {
+    if(nextNode != NULL){
       nextNode = nextNode->getNext();
     }
-    if (nextNode != NULL) {
+    if(nextNode != NULL){
       nextNode->lock();
     }
     prevNode->unlock();
@@ -155,20 +155,20 @@ bool Index::insert(int key){
 bool Index::remove(int key){
   Node *curNode = head;
   int curKey;
-  while (curNode != NULL){
+  while(curNode != NULL){
     curKey = curNode->getItem();
-    if (key == curKey){
+    if(key == curKey){
       Node *prevNode = curNode->getPrev();
       Node * nextNode = curNode->getNext();
-      if (prevNode != NULL){
+      if(prevNode != NULL){
         prevNode->setNext(nextNode);
       }
-      if (nextNode != NULL){
+      if(nextNode != NULL){
         nextNode->setPrev(prevNode);
       }
       delete curNode;
       return true;
-    } else if (key > curKey) {
+    } else if(key > curKey){
       return false; // could not find key
     }
     curNode =curNode->getNext();
