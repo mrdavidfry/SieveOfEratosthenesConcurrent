@@ -86,6 +86,7 @@ void insertNode(int key, Node *prevNode, Node *nextNode) {
 }
 
 bool Index::insert(int key){
+  mtx.lock();
   Node *prevNode = NULL;
   Node *curNode = head;
   if (curNode == NULL) {
@@ -93,7 +94,6 @@ bool Index::insert(int key){
     return true;
   }
   Node *nextNode = curNode->getNext();
-  mtx.lock();
   int curKey;
   while (curNode != NULL){
     curKey = curNode->getItem();
