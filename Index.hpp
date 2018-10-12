@@ -15,7 +15,7 @@ class Node {
   private:
 
     // Mutex of the node
-    std::mutex mutex;
+    // std::mutex mutex;
     // index key of the node
     int item;
 

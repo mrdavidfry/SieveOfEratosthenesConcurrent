@@ -11,6 +11,7 @@ Node::Node(int i){
   next = NULL;
 }
 
+/*
 void Node::lock(){
   mutex.lock();
 }
@@ -18,6 +19,7 @@ void Node::lock(){
 void Node::unlock(){
   mutex.unlock();
 }
+*/
 
 Node* Node::getPrev(){
   return prev;
@@ -55,7 +57,6 @@ bool Index::search(int key){
   mtx.lock();
   int curKey;
   Node *curNode = head;
-  Node *prevNode = NULL;
   while (curNode != NULL){
     curKey = curNode->getItem();
     if(key == curKey){
@@ -65,9 +66,7 @@ bool Index::search(int key){
       mtx.unlock();
       return false; // key not found
     }
-    prevNode = curNode;
     curNode = curNode->getNext();
-    prevNode->unlock();
   }
   mtx.unlock();
   return false; // key not found
