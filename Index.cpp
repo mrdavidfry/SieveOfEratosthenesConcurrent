@@ -64,7 +64,7 @@ bool Index::search(int key){
   int curKey;
   this->lock();
   Node *curNode = head;
-  Node *prevNode = NULL;
+  Node *prevNode;
   if (curNode == NULL) {
     this->unlock();
     return false;
@@ -91,12 +91,12 @@ bool Index::search(int key){
   return false; // key not found
 }
 
-void insertNode(int key, Node *prevNode, Node *nextNode) {
+void insertNode(int key, Node *curNode, Node *nextNode) {
   Node *newNode = new Node(key);
-  newNode->setPrev(prevNode);
+  newNode->setPrev(curNode);
   newNode->setNext(nextNode);
-  if (prevNode != NULL){
-    prevNode->setNext(newNode);
+  if (curNode != NULL){
+    curNode->setNext(newNode);
   }
   if (nextNode != NULL){
     nextNode->setPrev(newNode);
@@ -104,35 +104,53 @@ void insertNode(int key, Node *prevNode, Node *nextNode) {
 }
 
 bool Index::insert(int key){
-  Node *prevNode = NULL;
+  Node *prevNode;
   this->lock();
   Node *curNode = head;
+  Node *nextNode;
   if (curNode == NULL) {
-    insertNode(key, prevNode, NULL);
+    insertNode(key, head, tail);
     this->unlock();
     return true;
+  } else {
+    curNode->lock();
+    nextNode = curNode->getNext();
   }
-  Node *nextNode = curNode->getNext();
-  curNode->lock();
-  nextNode->lock();
+
+  if (nextNode != NULL) {
+    nextNode->lock();
+  }
   this->unlock();
   int curKey;
   while (curNode != NULL){
     curKey = curNode->getItem();
     if (key == curKey){
+      curNode->unlock();
+      if (nextNode != NULL) {
+        nextNode->unlock();
+      }
       return false; // key already in index
     } else if(key > curKey || nextNode == NULL) {
-      insertNode(key, prevNode, nextNode);
+      insertNode(key, curNode, nextNode);
+      curNode->unlock();
+      if (nextNode != NULL) {
+        nextNode->unlock();
+      }
       return true; // inserted key
     }
     prevNode = curNode;
     curNode = nextNode;
-    nextNode = nextNode->getNext();
+    if (nextNode != NULL) {
+      nextNode = nextNode->getNext();
+    }
+    if (nextNode != NULL) {
+      nextNode->lock();
+    }
+    prevNode->unlock();
   }
-  insertNode(key, prevNode, nextNode);
+  insertNode(key, prevNode, curNode);
   return true;
 }
-
 
 bool Index::remove(int key){
   Node *curNode = head;
