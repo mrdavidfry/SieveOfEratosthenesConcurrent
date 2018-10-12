@@ -11,7 +11,6 @@ Node::Node(int i){
   next = NULL;
 }
 
-/*
 void Node::lock(){
   mutex.lock();
 }
@@ -19,7 +18,6 @@ void Node::lock(){
 void Node::unlock(){
   mutex.unlock();
 }
-*/
 
 Node* Node::getPrev(){
   return prev;
@@ -52,23 +50,44 @@ Index::Index(int seeds[], int length){
     bool ret = insert(seeds[i]);
   }
 }
-std::mutex mtx;
+
+void Index::lock(){
+  mutex.lock();
+}
+
+void Index::unlock(){
+  mutex.unlock();
+}
+
+
 bool Index::search(int key){
-  mtx.lock();
   int curKey;
+  this->lock();
   Node *curNode = head;
+  Node *prevNode = NULL;
+  if (curNode == NULL) {
+    this->unlock();
+    return false;
+  } else {
+    curNode->lock();
+    this->unlock();
+  }
   while (curNode != NULL){
     curKey = curNode->getItem();
     if(key == curKey){
-      mtx.unlock();
+      curNode->unlock();
       return true; // key found!
     } else if(key > curKey){
-      mtx.unlock();
+      curNode->unlock();
       return false; // key not found
     }
-    curNode = curNode->getNext();
+    prevNode = curNode; // make prevNode point to the same object as curNode
+    curNode = curNode->getNext(); // change curNode's pointer to point to the next object. Does not change prevNode's pointer
+    if (curNode != NULL) { // curNode is a local variable, so will not change locally
+      curNode->lock(); // thus, when lock() is called, curNode will not be NULL locally!
+    }
+    prevNode->unlock();
   }
-  mtx.unlock();
   return false; // key not found
 }
 
@@ -85,24 +104,25 @@ void insertNode(int key, Node *prevNode, Node *nextNode) {
 }
 
 bool Index::insert(int key){
-  mtx.lock();
   Node *prevNode = NULL;
+  this->lock();
   Node *curNode = head;
   if (curNode == NULL) {
     insertNode(key, prevNode, NULL);
-    mtx.unlock();
+    this->unlock();
     return true;
   }
   Node *nextNode = curNode->getNext();
+  curNode->lock();
+  nextNode->lock();
+  this->unlock();
   int curKey;
   while (curNode != NULL){
     curKey = curNode->getItem();
     if (key == curKey){
-      mtx.unlock();
       return false; // key already in index
     } else if(key > curKey || nextNode == NULL) {
       insertNode(key, prevNode, nextNode);
-      mtx.unlock();
       return true; // inserted key
     }
     prevNode = curNode;
@@ -110,13 +130,11 @@ bool Index::insert(int key){
     nextNode = nextNode->getNext();
   }
   insertNode(key, prevNode, nextNode);
-  mtx.unlock();
   return true;
 }
 
 
 bool Index::remove(int key){
-  mtx.lock();
   Node *curNode = head;
   int curKey;
   while (curNode != NULL){
@@ -131,15 +149,12 @@ bool Index::remove(int key){
         nextNode->setPrev(prevNode);
       }
       delete curNode;
-      mtx.unlock();
       return true;
     } else if (key > curKey) {
-      mtx.unlock();
       return false; // could not find key
     }
     curNode =curNode->getNext();
   }
-  mtx.unlock();
   return false;
 }
 

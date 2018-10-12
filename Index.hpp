@@ -15,7 +15,8 @@ class Node {
   private:
 
     // Mutex of the node
-    // std::mutex mutex;
+    std::mutex mutex;
+
     // index key of the node
     int item;
 
@@ -46,12 +47,20 @@ class Node {
 class Index {
 
   private:
+    // Mutex of the list
+    std::mutex mutex;
 
     // pointers to the head and tail of the doubly linked list
     Node* head;
     Node* tail;
 
+
   public:
+
+    // Mutex methods:
+    void lock();
+    void unlock();
+
 
     // class constructor, loads an image from a provided file (or URL?)
     Index(int seeds[], int length);
